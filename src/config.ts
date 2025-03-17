@@ -1,0 +1,6 @@
+export const CONFIG = {
+	RPC_URL: 'https://soneium.drpc.org',
+	GAS_MULTIPLIER: [1, 1.1] as const,
+	ASTR_ADDRESS: '0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441',
+	NFT_ADDRESS: '0x64eA937352996dCa9B32D7A6a883FAa6C651Ccfc',
+};

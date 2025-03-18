@@ -12,8 +12,8 @@ async function multiSender(wallets: Wallet[]) {
 	const token: 'ETH' | 'ASTR' = await select({
 		message: 'Select token:',
 		choices: [
-			{ value: 'ETH', name: 'ETH' },
-			{ value: 'ASTR', name: 'ASTR' },
+			{ value: 'ETH', name: '1️⃣ ETH' },
+			{ value: 'ASTR', name: '2️⃣ ASTR' },
 		],
 	});
 
@@ -47,6 +47,9 @@ async function multiSender(wallets: Wallet[]) {
 }
 
 async function claimNfts(wallets: Wallet[]) {
+	const receiver = await input({
+		message: 'Enter receiver address:',
+	});
 	const count = await input({
 		message: 'Enter number of NFTs to claim (min: 1, max: 2):',
 		validate: value => {
@@ -55,18 +58,7 @@ async function claimNfts(wallets: Wallet[]) {
 		},
 	});
 	await Promise.all(
-		wallets.map(wallet => new Nft(wallet).claimNfts(Number(count))),
-	);
-}
-
-async function transferNfts(wallets: Wallet[]) {
-	const to = await input({ message: 'Enter receiver address:' });
-	await Promise.all(
-		wallets.map(
-			wallet =>
-				wallet.address.toLowerCase() !== to.toLowerCase() &&
-				new Nft(wallet).sendAllNfts(to),
-		),
+		wallets.map(wallet => new Nft(wallet).claimNfts(Number(count), receiver)),
 	);
 }
 
@@ -76,7 +68,6 @@ export async function showMenu(wallets: Wallet[]): Promise<boolean> {
 		choices: [
 			{ value: 'multisender', name: '💰 MultiSender' },
 			{ value: 'claim-nfts', name: '🎁 Claim NFTs' },
-			{ value: 'transfer-nfts', name: '🛫 Transfer NFTs' },
 			{ value: 'checker', name: '📊 Checker' },
 			new Separator(),
 			{ value: 'back', name: '🔙 Back to wallet selection' },
@@ -86,7 +77,6 @@ export async function showMenu(wallets: Wallet[]): Promise<boolean> {
 
 	if (module === 'multisender') await multiSender(wallets);
 	else if (module === 'claim-nfts') await claimNfts(wallets);
-	else if (module === 'transfer-nfts') await transferNfts(wallets);
 	else if (module === 'checker') await new Checker(wallets).run();
 	else if (module === 'back') return true;
 	else if (module === 'exit') process.exit(0);
@@ -112,7 +102,7 @@ export async function selectWallets(wallets: Wallet[]): Promise<Wallet[]> {
 		return [wallets[parseInt(input) - 1]];
 	}
 
-	await new Checker(wallets).run();
+	if (CONFIG.USE_CHECKER) await new Checker(wallets).run();
 	if (wallets.length === 1) return wallets;
 
 	console.log(

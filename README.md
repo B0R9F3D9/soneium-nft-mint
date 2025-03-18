@@ -6,7 +6,6 @@
 
 - 💰 **MultiSender** - Send ETH or ASTR tokens (set amount during runtime)
 - 🎁 **Claim NFTs** - Mint multiple NFTs at once (set amount during runtime)
-- 🛫 **Transfer NFTs** - Send all NFTs from all wallets to a chosen
 - 📊 **Checker** - Check wallets, display results in a table, and save to `/checker/`
 
 # Installation

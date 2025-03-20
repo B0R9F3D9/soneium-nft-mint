@@ -5,24 +5,23 @@
 	"scripts": {
 		"start": "bun run src/main.ts",
 		"format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
-		"lint": "eslint src --ext ts"
+		"lint": "eslint src --ext ts",
+		"lint:fix": "eslint src --ext ts --fix"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.21.0",
+		"@eslint/js": "^9.22.0",
 		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
-		"@types/bun": "^1.2.2",
-		"eslint": "^9.21.0",
+		"@types/bun": "^1.2.5",
+		"eslint": "^9.22.0",
 		"globals": "^16.0.0",
-		"prettier": "^3.5.1",
-		"typescript-eslint": "^8.26.0"
+		"prettier": "^3.5.3",
+		"typescript-eslint": "^8.27.0"
 	},
 	"peerDependencies": {
-		"typescript": "^5.7.3"
+		"typescript": "^5.8.2"
 	},
 	"dependencies": {
-		"chalk": "^5.4.1",
 		"cli-table3": "^0.6.5",
-		"dotenv": "^16.4.7",
 		"inquirer": "^12.5.0",
 		"web3": "^4.16.0",
 		"winston": "^3.17.0"

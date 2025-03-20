@@ -1,6 +1,6 @@
 # Soneium NFT Mint
 
-![image](https://github.com/user-attachments/assets/221a108f-5545-41fd-b7dc-cab79d3e8ae1)
+<img width="805" alt="image" src="https://github.com/user-attachments/assets/693c4168-2baa-4a28-a05b-45dd4fe7de4e" />
 
 # Available Modules
 

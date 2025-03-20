@@ -4,7 +4,7 @@ import { CONFIG } from '@/config';
 import { Checker, type Wallet } from '@/core';
 import { Nft } from '@/core/nft';
 
-import { randomFloat } from './utils';
+import { randomFloat, randomInt, sleep } from './utils';
 
 async function multiSender(wallets: Wallet[]) {
 	if (wallets.length === 1) throw new Error('Add at least two wallets');
@@ -43,6 +43,8 @@ async function multiSender(wallets: Wallet[]) {
 				wallet.address,
 				amount,
 			);
+		if (wallet.address !== walletsToSend.at(-1)?.address)
+			await sleep(randomInt(...CONFIG.SLEEP_BETWEEN_WALLETS));
 	}
 }
 
@@ -57,9 +59,11 @@ async function claimNfts(wallets: Wallet[]) {
 			return num >= 1 && num <= 2;
 		},
 	});
-	await Promise.all(
-		wallets.map(wallet => new Nft(wallet).claimNfts(Number(count), receiver)),
-	);
+	for (const wallet of wallets) {
+		await new Nft(wallet).claimNfts(Number(count), receiver);
+		if (wallet.address !== wallets.at(-1)?.address)
+			await sleep(randomInt(...CONFIG.SLEEP_BETWEEN_WALLETS));
+	}
 }
 
 export async function showMenu(wallets: Wallet[]): Promise<boolean> {

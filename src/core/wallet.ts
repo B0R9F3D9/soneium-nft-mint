@@ -1,9 +1,11 @@
-import { type Transaction, Web3 } from 'web3';
+import { type Numbers, type Transaction, Web3 } from 'web3';
 
-import { ERC20_ABI } from '@/abi/erc20';
-import { CONFIG } from '@/config';
+import { ERC20_ABI } from '@/constants/abi/erc20';
+import { CONFIG } from '@/constants/config';
 import { logger } from '@/lib/logger';
-import { isValidAddress, randomFloat, sleep } from '@/lib/utils';
+import { isValidAddress, randomFloat } from '@/lib/utils';
+import { SETTINGS } from '@/settings';
+import type { IToken } from '@/types/token';
 
 export class Wallet {
 	public web3: Web3;
@@ -28,37 +30,35 @@ export class Wallet {
 	}
 
 	public static generate() {
-		const web3 = new Web3();
-		return web3.eth.accounts.create();
+		return new Web3().eth.accounts.create();
 	}
 
-	async getEthBalance(): Promise<number> {
+	async getEthBalance() {
 		try {
-			return Number(await this.web3.eth.getBalance(this.address));
+			const wei = BigInt(await this.web3.eth.getBalance(this.address));
+			const amount = Number(wei) / 10 ** 18;
+			return { wei, amount, logAmount: amount.toFixed(6) };
 		} catch (error) {
-			throw new Error('Failed to get ETH balance: ' + (error as Error).message);
+			throw new Error(`Failed to get ETH balance: ${error as Error}`);
 		}
 	}
 
-	async getTokenBalance(tokenAddress: string): Promise<number> {
+	async getTokenBalance(token: IToken) {
 		try {
-			if (!isValidAddress(tokenAddress, this.web3))
-				throw new Error('Invalid token address');
-			const contract = new this.web3.eth.Contract(
-				ERC20_ABI,
-				this.web3.utils.toChecksumAddress(tokenAddress),
-			);
-			return Number(await contract.methods.balanceOf(this.address).call());
+			const contract = new this.web3.eth.Contract(ERC20_ABI, token.address);
+			const wei = BigInt(await contract.methods.balanceOf(this.address).call());
+			const amount = Number(wei) / 10 ** token.decimals;
+			return { wei, amount, logAmount: amount.toFixed(token.logDecimals) };
 		} catch (error) {
 			throw new Error(
-				'Failed to get token balance: ' + (error as Error).message,
+				`Failed to get ${token.symbol} balance: ${error as Error}`,
 			);
 		}
 	}
 
 	async getTxData(
 		to: string,
-		value: number = 0,
+		value: Numbers = 0,
 		data: string = '0x',
 	): Promise<Transaction> {
 		try {
@@ -71,13 +71,13 @@ export class Wallet {
 				value,
 				gasPrice: Math.floor(
 					Number(await this.web3.eth.getGasPrice()) *
-						randomFloat(...CONFIG.GAS_MULTIPLIER),
+						randomFloat(...SETTINGS.GAS_MULTIPLIER),
 				),
 				nonce: await this.web3.eth.getTransactionCount(this.address, 'pending'),
 				chainId: this.chainId,
 			};
 		} catch (error) {
-			throw new Error('Failed to get tx data: ' + (error as Error).message);
+			throw new Error('Failed to get tx data: ' + (error as Error));
 		}
 	}
 
@@ -93,7 +93,7 @@ export class Wallet {
 			);
 			return this.waitTx(txHash.transactionHash.toString());
 		} catch (error) {
-			throw new Error('Failed to send tx: ' + (error as Error).message);
+			throw new Error('Failed to send tx: ' + (error as Error));
 		}
 	}
 
@@ -109,13 +109,13 @@ export class Wallet {
 				} else if (status === 0) {
 					throw new Error(`Tx failed: ${txHash}`);
 				}
-				await sleep(500);
+				await new Promise(resolve => setTimeout(resolve, 1000));
 			} catch (e) {
 				if (e instanceof Error && e.message.includes('not found')) {
 					if (Date.now() - startTime > 45000) {
 						throw new Error(`Tx not found: ${txHash}`);
 					}
-					await sleep(1000);
+					await new Promise(resolve => setTimeout(resolve, 1000));
 				} else {
 					throw e;
 				}
@@ -124,73 +124,145 @@ export class Wallet {
 	}
 
 	async approve(
-		tokenAddress: string,
+		token: IToken,
 		spender: string,
 		amount: string = String(2n ** 256n - 1n),
-	): Promise<string> {
+	) {
 		try {
-			if (!isValidAddress(tokenAddress, this.web3))
-				throw new Error('Invalid token address');
 			if (!isValidAddress(spender, this.web3))
 				throw new Error('Invalid spender address');
 
-			const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
+			const contract = new this.web3.eth.Contract(ERC20_ABI, token.address);
 			const allowance = String(
 				await contract.methods.allowance(this.address, spender).call(),
 			);
 			if (BigInt(allowance) >= BigInt(amount)) {
-				logger.info(`${this.info} Approve already exists for ${spender}`);
-				return '';
+				return logger.info(
+					`${this.info} ${token.symbol} token approve already exists`,
+				);
 			}
 
+			logger.info(
+				`${this.info} Approving ${
+					amount === String(2n ** 256n - 1n)
+						? 'max'
+						: Number(amount).toFixed(token.logDecimals)
+				} ${token.symbol} for ${spender}`,
+			);
+
 			const data = contract.methods.approve(spender, amount).encodeABI();
-			return this.sendTx(await this.getTxData(tokenAddress, 0, data));
+			await this.sendTx(await this.getTxData(token.address, 0, data));
+
+			logger.info(
+				`${this.info} Successfully approved ${
+					amount === String(2n ** 256n - 1n)
+						? 'max'
+						: Number(amount).toFixed(token.logDecimals)
+				} ${token.symbol} for ${spender}`,
+			);
 		} catch (error) {
-			throw new Error('Failed to approve: ' + (error as Error).message);
+			throw new Error('Failed to approve: ' + (error as Error));
 		}
 	}
 
-	async transferEth(to: string, amount: number) {
+	async transferToken(token: IToken, to: string, amount: number) {
 		try {
 			if (!isValidAddress(to, this.web3))
 				throw new Error('Invalid receiver address');
 
 			logger.info(
-				`${this.info} Transferring ${amount / 10 ** 18} ETH to ${to}`,
+				`${this.info} Sending ${amount.toFixed(token.logDecimals)} ${token.symbol} to ${to}`,
 			);
-			const result = await this.sendTx(await this.getTxData(to, amount));
-			if (result)
-				logger.info(
-					`${this.info} ${(amount / 10 ** 18).toFixed(6)} ETH sent successfully`,
-				);
-			else throw new Error();
+
+			const contract = new this.web3.eth.Contract(ERC20_ABI, token.address);
+			const amountWei = this.web3.utils.toWei(String(amount), token.decimals);
+			const data = contract.methods.transfer(to, amountWei).encodeABI();
+			await this.sendTx(await this.getTxData(token.address, 0, data));
+
+			logger.info(
+				`${this.info} Successfully sent ${amount.toFixed(token.logDecimals)} ${token.symbol} to ${to}`,
+			);
 		} catch (error) {
-			throw new Error('Failed to transfer ETH: ' + (error as Error).message);
+			throw new Error('Failed to transfer token: ' + (error as Error));
 		}
 	}
 
-	async transferToken(tokenAddress: string, to: string, amount: number) {
+	async transferEth(to: string, amountEther: number) {
 		try {
-			if (!isValidAddress(tokenAddress, this.web3))
-				throw new Error('Invalid token address');
 			if (!isValidAddress(to, this.web3))
 				throw new Error('Invalid receiver address');
 
 			logger.info(
-				`${this.info} Transferring ${amount / 10 ** 18} ${tokenAddress} to ${to}`,
+				`${this.info} Sending ${amountEther.toFixed(6)} ETH to ${to}`,
 			);
-			const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
-			const data = contract.methods.transfer(to, amount).encodeABI();
-			const result = await this.sendTx(
-				await this.getTxData(tokenAddress, 0, data),
+
+			await this.sendTx(
+				await this.getTxData(
+					to,
+					this.web3.utils.toWei(String(amountEther), 'ether'),
+				),
 			);
-			if (result)
-				logger.info(
-					`${this.info} ${amount}(wei) ${tokenAddress} sent successfully`,
-				);
-			else throw new Error();
+
+			logger.info(
+				`${this.info} Successfully sent ${amountEther.toFixed(6)} ETH to ${to}`,
+			);
 		} catch (error) {
-			throw new Error('Failed to transfer token: ' + (error as Error).message);
+			throw new Error('Failed to transfer ETH: ' + (error as Error));
+		}
+	}
+
+	async transferAllEth(to: string) {
+		try {
+			if (!isValidAddress(to, this.web3))
+				throw new Error('Invalid receiver address');
+
+			const balance = await this.getEthBalance();
+			const tempTx = await this.getTxData(to);
+			const gasCost = BigInt(tempTx.gasPrice!) * BigInt(21000) * BigInt(2);
+			const amountWei = BigInt(balance.wei) - gasCost;
+			const amountEther = Number(amountWei) / 10 ** 18;
+			if (amountWei <= 0) throw new Error('Insufficient balance');
+
+			logger.info(
+				`${this.info} Sending ${amountEther.toFixed(6)} ETH to ${to}`,
+			);
+
+			await this.sendTx(await this.getTxData(to, Number(amountWei)));
+
+			logger.info(
+				`${this.info} Successfully sent ${amountEther.toFixed(6)} ETH to ${to}`,
+			);
+		} catch (error) {
+			throw new Error(
+				'Failed to transfer all ETH: ' + (error as Error).message,
+			);
+		}
+	}
+
+	async transferAllToken(token: IToken, to: string) {
+		try {
+			if (!isValidAddress(to, this.web3))
+				throw new Error('Invalid receiver address');
+
+			const balance = await this.getTokenBalance(token);
+
+			logger.info(
+				`${this.info} Sending ${balance.logAmount} ${token.symbol} to ${to}`,
+			);
+
+			const contract = new this.web3.eth.Contract(ERC20_ABI, token.address);
+			const data = contract.methods.transfer(to, balance.wei).encodeABI();
+			await this.sendTx(await this.getTxData(token.address, 0, data));
+
+			logger.info(
+				`${this.info} Successfully sent ${
+					balance.logAmount
+				} ${token.symbol} to ${to}`,
+			);
+		} catch (error) {
+			throw new Error(
+				`Failed to transfer all ${token.symbol} token: ` + (error as Error),
+			);
 		}
 	}
 }

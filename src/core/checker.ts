@@ -1,11 +1,10 @@
 import Table from 'cli-table3';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
-import { CONFIG } from '@/config';
+import { TOKENS } from '@/constants/tokens';
 import type { Wallet } from '@/core/wallet';
 import type { IChecker } from '@/types/checker';
-
-import { mkdir, writeFile } from 'fs/promises';
+import type { IToken } from '@/types/token';
 
 export class Checker {
 	private readonly headers: string[] = [
@@ -13,21 +12,28 @@ export class Checker {
 		'Address',
 		'ETH Balance',
 		'ASTR Balance',
-		'NFT Balance',
+		'NFT',
 	];
 
 	constructor(public wallets: Wallet[]) {}
 
+	async getTokenBalance(wallet: Wallet, token: IToken) {
+		const balance = await wallet.getTokenBalance(token);
+		return balance.logAmount;
+	}
+
 	async checkWallet(wallet: Wallet): Promise<IChecker> {
-		const ethBalance = await wallet.getEthBalance();
-		const astrBalance = await wallet.getTokenBalance(CONFIG.ASTR_ADDRESS);
-		const nftBalance = await wallet.getTokenBalance(CONFIG.NFT_ADDRESS);
+		const [ethBalance, astrBalance, nftBalance] = await Promise.all([
+			wallet.getEthBalance(),
+			this.getTokenBalance(wallet, TOKENS.ASTR),
+			this.getTokenBalance(wallet, TOKENS.NFT),
+		]);
 		return {
 			index: wallet.index,
 			address: wallet.address,
-			ethBalance: (ethBalance / 1e18).toFixed(6),
-			astrBalance: (astrBalance / 1e18).toFixed(1),
-			nftBalance: nftBalance.toFixed(0),
+			ethBalance: ethBalance.logAmount,
+			astrBalance,
+			nftBalance,
 		};
 	}
 
@@ -53,21 +59,33 @@ export class Checker {
 			},
 		});
 
-		results.forEach(r => {
-			table.push(Object.values(r));
-		});
+		const addressCount = new Map<string, number>();
+		results.forEach(r =>
+			addressCount.set(r.address, (addressCount.get(r.address) || 0) + 1),
+		);
+		results.forEach(r =>
+			table.push([
+				r.index,
+				addressCount.get(r.address)! > 1
+					? `\x1b[31m${r.address}\x1b[0m`
+					: r.address,
+				r.ethBalance,
+				r.astrBalance,
+				r.nftBalance,
+			]),
+		);
 		console.log(table.toString());
 	}
 
-	private async saveResults(results: IChecker[]) {
+	private saveResults(results: IChecker[]) {
 		const dir = './checker';
-		if (!existsSync(dir)) await mkdir(dir);
+		if (!existsSync(dir)) mkdirSync(dir);
 
 		const headers = this.headers.join(',');
 		const rows = results.map(r => Object.values(r).join(',')).join('\n');
 
 		const timestamp = new Date().toLocaleString().replace(/[/,: ]/g, '-');
-		await writeFile(`${dir}/${timestamp}.csv`, headers + '\n' + rows);
+		writeFileSync(`${dir}/${timestamp}.csv`, headers + '\n' + rows);
 	}
 
 	public async run() {
@@ -75,6 +93,6 @@ export class Checker {
 			this.wallets.map(wallet => this.checkWallet(wallet)),
 		);
 		this.printTable(results);
-		await this.saveResults(results);
+		this.saveResults(results);
 	}
 }

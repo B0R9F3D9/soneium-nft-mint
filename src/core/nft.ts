@@ -1,5 +1,5 @@
-import { NFT_ABI } from '@/abi/nft';
-import { CONFIG } from '@/config';
+import { NFT_ABI } from '@/constants/abi/nft';
+import { TOKENS } from '@/constants/tokens';
 import type { Wallet } from '@/core/wallet';
 import { logger } from '@/lib/logger';
 import { isValidAddress } from '@/lib/utils';
@@ -16,17 +16,19 @@ export class Nft {
 			if (!isValidAddress(receiver, this.wallet.web3))
 				throw new Error('Invalid receiver address');
 
+			await this.wallet.approve(TOKENS.ASTR, TOKENS.NFT.address);
+
 			logger.info(`${this.wallet.info} Claiming ${count} NFTs...`);
 
 			const contract = new this.wallet.web3.eth.Contract(
 				NFT_ABI,
-				CONFIG.NFT_ADDRESS,
+				TOKENS.NFT.address,
 			);
 			const data = contract.methods
 				.claim(
 					this.wallet.web3.utils.toChecksumAddress(receiver),
 					count,
-					CONFIG.ASTR_ADDRESS,
+					TOKENS.ASTR.address,
 					10 * 10 ** 18,
 					[
 						[
@@ -34,22 +36,20 @@ export class Nft {
 						],
 						2,
 						10 * 10 ** 18,
-						CONFIG.ASTR_ADDRESS,
+						TOKENS.ASTR.address,
 					],
 					'0x',
 				)
 				.encodeABI();
 
 			const result = await this.wallet.sendTx(
-				await this.wallet.getTxData(CONFIG.NFT_ADDRESS, 0, data),
+				await this.wallet.getTxData(TOKENS.NFT.address, 0, data),
 			);
 			if (result)
-				logger.info(`${this.wallet.info} ${count} NFTs successfully claimed`);
+				logger.info(`${this.wallet.info} Successfully claimed ${count} NFTs`);
 			else throw new Error();
 		} catch (error) {
-			logger.error(
-				`${this.wallet.info} Failed to claim ${count} NFT: ${(error as Error).message}`,
-			);
+			throw new Error('Failed to claim NFT: ' + (error as Error).message);
 		}
 	}
 }

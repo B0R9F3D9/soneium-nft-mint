@@ -18,11 +18,14 @@ async function multiSender(wallets: Wallet[]) {
 		],
 	});
 
-	const senderWallets = await selectWallets(wallets);
-	if (senderWallets.length > 1) throw new Error('Select only one wallet');
-	const senderWallet = senderWallets[0];
-	const walletsToSend = await selectWallets(
-		wallets.filter(wallet => wallet.address !== senderWallet.address),
+	const senderWalletIndex = await input({
+		message: 'Enter sender wallet index:',
+		validate: value => Number(value) > 0 && Number(value) <= wallets.length,
+	}).then(value => Number(value) - 1);
+
+	const senderWallet = wallets[senderWalletIndex];
+	const walletsToSend = wallets.filter(
+		wallet => wallet.address !== senderWallet.address,
 	);
 
 	const minAmount = await input({
@@ -35,9 +38,9 @@ async function multiSender(wallets: Wallet[]) {
 	});
 
 	for (const wallet of walletsToSend) {
-		const amount = randomFloat(Number(minAmount), Number(maxAmount));
-		if (token === 'ETH')
-			await senderWallet.transferEth(wallet.address, amount * 10 ** 18);
+		let amount = randomFloat(Number(minAmount), Number(maxAmount));
+		amount = Math.floor(amount * 10 ** 18); // TODO: remove
+		if (token === 'ETH') await senderWallet.transferEth(wallet.address, amount);
 		if (token === 'ASTR')
 			await senderWallet.transferToken(
 				CONFIG.ASTR_ADDRESS,
@@ -82,7 +85,7 @@ async function generateWallets() {
 		'./data/keys.txt',
 		'\n' + wallets.map(wallet => wallet.privateKey).join('\n') + '\n',
 	);
-	logger.info(`Successfully generated ${count} wallets`);
+	logger.info(`Successfully generated ${count} wallets. Please restart app.`);
 }
 
 export async function showMenu(wallets: Wallet[]): Promise<boolean> {

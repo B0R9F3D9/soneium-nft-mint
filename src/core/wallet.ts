@@ -155,6 +155,9 @@ export class Wallet {
 			if (!isValidAddress(to, this.web3))
 				throw new Error('Invalid receiver address');
 
+			logger.info(
+				`${this.info} Transferring ${amount / 10 ** 18} ETH to ${to}`,
+			);
 			const result = await this.sendTx(await this.getTxData(to, amount));
 			if (result)
 				logger.info(
@@ -173,6 +176,9 @@ export class Wallet {
 			if (!isValidAddress(to, this.web3))
 				throw new Error('Invalid receiver address');
 
+			logger.info(
+				`${this.info} Transferring ${amount / 10 ** 18} ${tokenAddress} to ${to}`,
+			);
 			const contract = new this.web3.eth.Contract(ERC20_ABI, tokenAddress);
 			const data = contract.methods.transfer(to, amount).encodeABI();
 			const result = await this.sendTx(

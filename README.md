@@ -1,12 +1,14 @@
 # Soneium NFT Mint
 
-<img width="805" alt="image" src="https://github.com/user-attachments/assets/693c4168-2baa-4a28-a05b-45dd4fe7de4e" />
+<img width="746" alt="image" src="https://github.com/user-attachments/assets/23105f8a-3548-45de-b767-2e37a87d388f" />
 
 # Available Modules
 
-- 💰 **MultiSender** - Send ETH or ASTR tokens (set amount during runtime)
-- 🎁 **Claim NFTs** - Mint multiple NFTs at once (set amount during runtime)
-- 📊 **Checker** - Check wallets, display results in a table, and save to `/checker/`
+- 💰 **MultiSender** - _Send ETH or ASTR tokens (sender is set at runtime, amount is set in `/src/settings.ts`)_
+- 🎁 **Claim NFTs** - _Mint multiple NFTs at once (set amount in `/src/settings.ts`)_
+- 💥 **Token Collector** - _Send entire ETH or ASTR balance (recipient is set at runtime, minimum amount is set in `/src/settings.ts`_
+- 👛 **Generate Wallets** - _Generates and stores private keys to `/data/keys.txt`_
+- 📊 **Checker** - _Check wallets, display results in a table, and saves to `/checker/`_
 
 # Installation
 
@@ -20,6 +22,7 @@
 
 - Rename `/data/keys.txt.example` to `/data/keys.txt`
 - Add your wallet private keys (starting with `0x`) to `/data/keys.txt`
+- Configurate `/src/settings.ts`
 
 # Start
 

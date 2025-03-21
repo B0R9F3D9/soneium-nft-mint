@@ -99,7 +99,7 @@ export class Wallet {
 				const receipt = await this.web3.eth.getTransactionReceipt(txHash);
 				const status = Number(receipt.status);
 				if (status === 1) {
-					logger.info(`Tx successful: ${txHash}`);
+					logger.info(`${this.info} Tx successful: ${txHash}`);
 					return txHash;
 				} else if (status === 0) {
 					throw new Error(`Tx failed: ${txHash}`);

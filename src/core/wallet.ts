@@ -27,6 +27,11 @@ export class Wallet {
 		this.chainId = await this.web3.eth.getChainId().then(Number);
 	}
 
+	public static generate() {
+		const web3 = new Web3();
+		return web3.eth.accounts.create();
+	}
+
 	async getEthBalance(): Promise<number> {
 		try {
 			return Number(await this.web3.eth.getBalance(this.address));

@@ -1,10 +1,11 @@
 import { input, select, Separator } from '@inquirer/prompts';
+import fs from 'fs';
 
 import { CONFIG } from '@/config';
-import { Checker, type Wallet } from '@/core';
+import { Checker, Wallet } from '@/core';
 import { Nft } from '@/core/nft';
-
-import { randomFloat, randomInt, sleep } from './utils';
+import { logger } from '@/lib/logger';
+import { randomFloat, randomInt, sleep } from '@/lib/utils';
 
 async function multiSender(wallets: Wallet[]) {
 	if (wallets.length === 1) throw new Error('Add at least two wallets');
@@ -65,6 +66,24 @@ async function claimNfts(wallets: Wallet[]) {
 			await sleep(randomInt(...CONFIG.SLEEP_BETWEEN_WALLETS));
 	}
 }
+async function generateWallets() {
+	const count = await input({
+		message: 'Enter number of wallets to generate:',
+		validate: value => Number(value) > 0,
+	});
+
+	const wallets = await Promise.all(
+		Array(Number(count))
+			.fill(null)
+			.map(() => Wallet.generate()),
+	);
+
+	fs.appendFileSync(
+		'./data/keys.txt',
+		'\n' + wallets.map(wallet => wallet.privateKey).join('\n') + '\n',
+	);
+	logger.info(`Successfully generated ${count} wallets`);
+}
 
 export async function showMenu(wallets: Wallet[]): Promise<boolean> {
 	const module = await select({
@@ -72,15 +91,17 @@ export async function showMenu(wallets: Wallet[]): Promise<boolean> {
 		choices: [
 			{ value: 'multisender', name: '💰 MultiSender' },
 			{ value: 'claim-nfts', name: '🎁 Claim NFTs' },
+			{ value: 'generate-wallets', name: '👛 Generate Wallets' },
 			{ value: 'checker', name: '📊 Checker' },
 			new Separator(),
-			{ value: 'back', name: '🔙 Back to wallet selection' },
+			{ value: 'back', name: '⬅️ Back to wallet selection' },
 			{ value: 'exit', name: '❌ Exit' },
 		],
 	});
 
 	if (module === 'multisender') await multiSender(wallets);
 	else if (module === 'claim-nfts') await claimNfts(wallets);
+	else if (module === 'generate-wallets') await generateWallets();
 	else if (module === 'checker') await new Checker(wallets).run();
 	else if (module === 'back') return true;
 	else if (module === 'exit') process.exit(0);

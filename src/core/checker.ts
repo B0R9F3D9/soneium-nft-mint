@@ -20,13 +20,13 @@ export class Checker {
 
 	async checkWallet(wallet: Wallet): Promise<IChecker> {
 		const ethBalance = await wallet.getEthBalance();
-		const astraBalance = await wallet.getTokenBalance(CONFIG.ASTR_ADDRESS);
+		const astrBalance = await wallet.getTokenBalance(CONFIG.ASTR_ADDRESS);
 		const nftBalance = await wallet.getTokenBalance(CONFIG.NFT_ADDRESS);
 		return {
 			index: wallet.index,
 			address: wallet.address,
 			ethBalance: (ethBalance / 1e18).toFixed(6),
-			astrBalance: astraBalance.toFixed(1),
+			astrBalance: (astrBalance / 1e18).toFixed(1),
 			nftBalance: nftBalance.toFixed(0),
 		};
 	}

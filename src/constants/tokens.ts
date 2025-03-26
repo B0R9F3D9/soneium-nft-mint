@@ -1,4 +1,4 @@
-import { SETTINGS } from '@/settings';
+import { SETTINGS } from '@/constants/settings';
 import type { IToken } from '@/types/token';
 
 export const TOKENS: Record<'ASTR' | 'NFT', IToken> = {

@@ -2,9 +2,9 @@ import { type Numbers, type Transaction, Web3 } from 'web3';
 
 import { ERC20_ABI } from '@/constants/abi/erc20';
 import { CONFIG } from '@/constants/config';
+import { SETTINGS } from '@/constants/settings';
 import { logger } from '@/lib/logger';
 import { isValidAddress, randomFloat } from '@/lib/utils';
-import { SETTINGS } from '@/settings';
 import type { IToken } from '@/types/token';
 
 export class Wallet {

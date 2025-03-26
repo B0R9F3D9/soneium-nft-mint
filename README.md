@@ -4,9 +4,9 @@
 
 # Available Modules
 
-- 💰 **MultiSender** - _Send ETH or ASTR tokens (sender is set at runtime, amount is set in `/src/settings.ts`)_
-- 🎁 **Claim NFTs** - _Mint multiple NFTs at once (set amount in `/src/settings.ts`)_
-- 💥 **Token Collector** - _Send entire ETH or ASTR balance (recipient is set at runtime, minimum amount is set in `/src/settings.ts`_
+- 💰 **MultiSender** - _Send ETH or ASTR tokens (sender is set at runtime, amount is set in `/data/settings.json`)_
+- 🎁 **Claim NFTs** - _Mint multiple NFTs at once (set amount in `/data/settings.json`)_
+- 💥 **Token Collector** - _Send entire ETH or ASTR balance (recipient is set at runtime, minimum amount is set in `/data/settings.json`_
 - 👛 **Generate Wallets** - _Generates and stores private keys to `/data/keys.txt`_
 - 📊 **Checker** - _Check wallets, display results in a table, and saves to `/checker/`_
 
@@ -22,7 +22,7 @@
 
 - Rename `/data/keys.txt.example` to `/data/keys.txt`
 - Add your wallet private keys (starting with `0x`) to `/data/keys.txt`
-- Configurate `/src/settings.ts`
+- Configurate `/data/settings.json`
 
 # Start
 

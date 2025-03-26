@@ -1,5 +1,6 @@
 import { input, select } from '@inquirer/prompts';
 
+import { SETTINGS } from '@/constants/settings';
 import { TOKENS } from '@/constants/tokens';
 import { Checker, Wallet } from '@/core';
 import { Nft } from '@/core/nft';
@@ -11,7 +12,6 @@ import {
 	sleep,
 	writePrivateKeys,
 } from '@/lib/utils';
-import { SETTINGS } from '@/settings';
 
 export async function checkDuplicates(keys: string[]) {
 	const uniqKeys = new Set(keys);
@@ -98,13 +98,27 @@ async function multiSender(wallets: Wallet[]) {
 }
 
 async function claimNfts(wallets: Wallet[]) {
-	const receiver = await input({
-		message: 'Enter receiver address:',
+	const mode = await select({
+		message: 'Select mode:',
+		choices: [
+			{ value: 'approve', name: 'Only Approve' },
+			{ value: 'claim', name: 'Only Claim' },
+			{ value: 'all', name: 'Approve & Claim' },
+		],
 	});
+
+	let receiver = '';
+	if (mode !== 'approve') {
+		receiver = await input({
+			message: 'Enter receiver address:',
+		});
+	}
 
 	for (const wallet of wallets) {
 		try {
-			await new Nft(wallet).claimNfts(SETTINGS.CLAIM_NFT_AMOUNT, receiver);
+			if (mode === 'approve')
+				await wallet.approve(TOKENS.ASTR, TOKENS.NFT.address);
+			else await new Nft(wallet).claimNfts(SETTINGS.CLAIM_NFT_AMOUNT, receiver);
 			if (wallet.address !== wallets.at(-1)?.address)
 				await sleep(
 					randomFloat(...SETTINGS.SLEEP_BETWEEN_WALLETS),

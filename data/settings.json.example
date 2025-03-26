@@ -1,10 +1,21 @@
 {
+	// Gas multiplier for each transaction [min, max]
 	"GAS_MULTIPLIER": [1, 1.2],
+
+	// Amount of ETH and ASTR to send in multisend [min, max]
 	"MULTISEND_ETH_AMOUNT": [0.00002, 0.00003],
 	"MULTISEND_ASTR_AMOUNT": [20.0, 20.01],
+
+	// Sleep time between different wallets [min, max]
 	"SLEEP_BETWEEN_WALLETS": [0, 0],
+
+	// Number of NFTs to claim
 	"CLAIM_NFT_AMOUNT": 2,
+
+	// NFT contract address
 	"NFT_ADDRESS": "0xa00bE2Ee03f3832C7b7F8EE86164b7AA54f02efe",
+
+	// Minimum amount of ETH and ASTR in collector's wallet to start
 	"COLLECTOR_MIN_ETH_AMOUNT": 0.00001,
 	"COLLECTOR_MIN_ASTR_AMOUNT": 0.01
 }

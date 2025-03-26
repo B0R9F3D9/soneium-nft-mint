@@ -22,6 +22,7 @@
 
 - Rename `/data/keys.txt.example` to `/data/keys.txt`
 - Add your wallet private keys (starting with `0x`) to `/data/keys.txt`
+- Rename `/data/settings.json.example` to `/data/settings.json`
 - Configurate `/data/settings.json`
 
 # Start

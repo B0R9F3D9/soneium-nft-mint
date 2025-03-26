@@ -102,7 +102,6 @@ async function claimNfts(wallets: Wallet[]) {
 		message: 'Select mode:',
 		choices: [
 			{ value: 'approve', name: 'Only Approve' },
-			{ value: 'claim', name: 'Only Claim' },
 			{ value: 'all', name: 'Approve & Claim' },
 		],
 	});

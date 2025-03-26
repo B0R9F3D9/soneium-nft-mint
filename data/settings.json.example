@@ -1,4 +1,10 @@
 {
+	// Work mode: "batch" - processes multiple at once, "chain" - processes sequentially
+	"MODE": "batch",
+
+	// Batch size at a time
+	"BATCH_SIZE": 30,
+
 	// Gas multiplier for each transaction [min, max]
 	"GAS_MULTIPLIER": [1, 1.2],
 
@@ -6,8 +12,8 @@
 	"MULTISEND_ETH_AMOUNT": [0.00002, 0.00003],
 	"MULTISEND_ASTR_AMOUNT": [20.0, 20.01],
 
-	// Sleep time between different wallets [min, max]
-	"SLEEP_BETWEEN_WALLETS": [0, 0],
+	// Sleep time in seconds between wallets or batches [min, max]
+	"SLEEP_TIME": [3, 5],
 
 	// Number of NFTs to claim
 	"CLAIM_NFT_AMOUNT": 2,

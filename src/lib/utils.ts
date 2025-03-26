@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import type Web3 from 'web3';
 
 import { CONFIG } from '@/constants/config';
+import { SETTINGS } from '@/constants/settings';
 
 import { logger } from './logger';
 
@@ -43,4 +44,22 @@ export function writePrivateKeys(keys: string[]) {
 
 export function addPrivateKeys(newKeys: string[]) {
 	writePrivateKeys([...readPrivateKeys(), ...newKeys]);
+}
+
+export async function runInBatches<T>(
+	items: T[],
+	callback: (item: T) => Promise<void>,
+) {
+	const batches = Array(Math.ceil(items.length / SETTINGS.BATCH_SIZE))
+		.fill(null)
+		.map((_, i) =>
+			items.slice(i * SETTINGS.BATCH_SIZE, (i + 1) * SETTINGS.BATCH_SIZE),
+		);
+
+	for (let i = 0; i < batches.length; i++) {
+		await Promise.all(batches[i].map(callback));
+		if (i < batches.length - 1) {
+			await sleep(randomFloat(...SETTINGS.SLEEP_TIME));
+		}
+	}
 }

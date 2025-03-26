@@ -1,12 +1,31 @@
+import { select } from '@inquirer/prompts';
 import { existsSync } from 'fs';
 
 import { Wallet } from '@/core';
-import { checkDuplicates, showMenu } from '@/core/menu';
+import { showMenu } from '@/core/menu';
 import { logger } from '@/lib/logger';
+import { readPrivateKeys, writePrivateKeys } from '@/lib/utils';
 
-import { readPrivateKeys } from './lib/utils';
+async function checkDuplicates(keys: string[]) {
+	const uniqKeys = new Set(keys);
+	if (uniqKeys.size < keys.length) {
+		logger.info(`Keys list contains ${keys.length - uniqKeys.size} duplicates`);
+		const answer = await select({
+			message: `Do you want to remove them?`,
+			choices: [
+				{ value: 'yes', name: 'Yes' },
+				{ value: 'no', name: 'No' },
+			],
+		});
+		if (answer === 'yes') {
+			writePrivateKeys(Array.from(uniqKeys));
+			logger.info('Duplicates removed. Please restart the script.');
+			process.exit(0);
+		}
+	}
+}
 
-(async () => {
+async function main() {
 	logger.info('-'.repeat(50));
 	console.clear();
 
@@ -31,4 +50,6 @@ import { readPrivateKeys } from './lib/utils';
 			);
 		}
 	}
-})();
+}
+
+main();

@@ -19,7 +19,7 @@
 	"CLAIM_NFT_AMOUNT": 2,
 
 	// NFT contract address
-	"NFT_ADDRESS": "0xa00bE2Ee03f3832C7b7F8EE86164b7AA54f02efe",
+	"NFT_ADDRESS": "0x11f287216397fcb88E0F5DcfD318d3A7E8d1fe08",
 
 	// Minimum amount of ETH and ASTR in collector's wallet to start
 	"COLLECTOR_MIN_ETH_AMOUNT": 0.00001,

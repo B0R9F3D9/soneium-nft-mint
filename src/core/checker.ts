@@ -1,6 +1,7 @@
 import Table from 'cli-table3';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
+import { CONFIG } from '@/constants/config';
 import { TOKENS } from '@/constants/tokens';
 import type { Wallet } from '@/core/wallet';
 import type { IChecker } from '@/types/checker';
@@ -78,7 +79,7 @@ export class Checker {
 	}
 
 	private saveResults(results: IChecker[]) {
-		const dir = './checker';
+		const dir = CONFIG.CHECKER_PATH;
 		if (!existsSync(dir)) mkdirSync(dir);
 
 		const headers = this.headers.join(',');

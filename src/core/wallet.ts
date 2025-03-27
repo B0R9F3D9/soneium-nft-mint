@@ -13,7 +13,6 @@ export class Wallet {
 	public info: string;
 	public index: number;
 	private privateKey: string;
-	private chainId!: number;
 
 	constructor(index: number, privateKey: string) {
 		this.web3 = new Web3(CONFIG.RPC_URL);
@@ -22,11 +21,6 @@ export class Wallet {
 		this.index = index;
 		this.address = acc.address;
 		this.info = `[№${index} - ${this.address.slice(0, 5)}...${this.address.slice(-5)}]`;
-		this.initialize();
-	}
-
-	private async initialize(): Promise<void> {
-		this.chainId = await this.web3.eth.getChainId().then(Number);
 	}
 
 	public static generate() {
@@ -74,7 +68,7 @@ export class Wallet {
 						randomFloat(...SETTINGS.GAS_MULTIPLIER),
 				),
 				nonce: await this.web3.eth.getTransactionCount(this.address, 'pending'),
-				chainId: this.chainId,
+				chainId: CONFIG.CHAIN_ID,
 			};
 		} catch (error) {
 			throw new Error('Failed to get tx data: ' + (error as Error));

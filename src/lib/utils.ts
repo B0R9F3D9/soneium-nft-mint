@@ -3,8 +3,7 @@ import type Web3 from 'web3';
 
 import { CONFIG } from '@/constants/config';
 import { SETTINGS } from '@/constants/settings';
-
-import { logger } from './logger';
+import { logger } from '@/lib/logger';
 
 export function randomInt(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;

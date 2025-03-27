@@ -11,7 +11,7 @@ export class Nft {
 		this.wallet = wallet;
 	}
 
-	async claimNfts(count: number, receiver: string) {
+	async claim(count: number, receiver: string) {
 		try {
 			if (!isValidAddress(receiver, this.wallet.web3))
 				throw new Error('Invalid receiver address');

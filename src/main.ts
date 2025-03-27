@@ -1,10 +1,11 @@
 import { select } from '@inquirer/prompts';
 import { existsSync } from 'fs';
 
-import { Wallet } from '@/core';
-import { showMenu } from '@/core/menu';
+import { showMenu, Wallet } from '@/core';
 import { logger } from '@/lib/logger';
 import { readPrivateKeys, writePrivateKeys } from '@/lib/utils';
+
+import { CONFIG } from './constants/config';
 
 async function checkDuplicates(keys: string[]) {
 	const uniqKeys = new Set(keys);
@@ -29,9 +30,9 @@ async function main() {
 	logger.info('-'.repeat(50));
 	console.clear();
 
-	if (!existsSync('./data/keys.txt'))
+	if (!existsSync(CONFIG.KEYS_PATH))
 		return logger.error('Fill in the keys list!');
-	if (!existsSync('./data/settings.json'))
+	if (!existsSync(CONFIG.SETTINGS_PATH))
 		return logger.error('Fill in the settings file!');
 
 	const KEYS = readPrivateKeys();

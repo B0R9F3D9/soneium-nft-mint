@@ -3,6 +3,8 @@ import type { TransformableInfo } from 'logform';
 import * as path from 'path';
 import * as winston from 'winston';
 
+import { CONFIG } from '@/constants/config';
+
 const customFormat = winston.format.printf(
 	(info: TransformableInfo): string => {
 		const { level, message, timestamp } = info;
@@ -10,7 +12,7 @@ const customFormat = winston.format.printf(
 	},
 );
 
-const logDir = './logs';
+const logDir = CONFIG.LOGS_PATH;
 if (!fs.existsSync(logDir)) {
 	fs.mkdirSync(logDir, { recursive: true });
 }

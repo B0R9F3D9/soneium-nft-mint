@@ -26,7 +26,7 @@ export async function claimNfts(wallets: Wallet[]) {
 			if (mode === 'approve') {
 				await wallet.approve(TOKENS.ASTR, TOKENS.NFT.address);
 			} else {
-				await new Nft(wallet).claimNfts(SETTINGS.CLAIM_NFT_AMOUNT, receiver);
+				await new Nft(wallet).claim(SETTINGS.CLAIM_NFT_AMOUNT, receiver);
 			}
 		} catch (error) {
 			logger.error(`${wallet.info} ${error}`);

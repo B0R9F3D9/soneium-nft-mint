@@ -15,7 +15,7 @@ export class Wallet {
 	private privateKey: string;
 
 	constructor(index: number, privateKey: string) {
-		this.web3 = new Web3(CONFIG.RPC_URL);
+		this.web3 = new Web3(SETTINGS.RPC_URL);
 		const acc = this.web3.eth.accounts.privateKeyToAccount(privateKey);
 		this.privateKey = acc.privateKey;
 		this.index = index;

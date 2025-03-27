@@ -1,6 +1,7 @@
 export interface ISettings {
 	readonly MODE: 'batch' | 'chain';
 	readonly BATCH_SIZE: number;
+	readonly RPC_URL: string;
 	readonly GAS_MULTIPLIER: [number, number];
 	readonly MULTISEND_ETH_AMOUNT: [number, number];
 	readonly MULTISEND_ASTR_AMOUNT: [number, number];

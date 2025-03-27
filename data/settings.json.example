@@ -5,6 +5,9 @@
 	// Batch size at a time
 	"BATCH_SIZE": 30,
 
+	// RPC URL
+	"RPC_URL": "https://rpc.soneium.org",
+
 	// Gas multiplier for each transaction [min, max]
 	"GAS_MULTIPLIER": [1, 1.2],
 

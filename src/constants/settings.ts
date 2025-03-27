@@ -5,7 +5,7 @@ import type { ISettings } from '@/types/settings';
 function removeComments(jsonString: string): string {
 	return jsonString
 		.split('\n')
-		.map(line => line.replace(/\/\/.*$/, ''))
+		.map(line => line.replace(/\/\/\s.*$/, ''))
 		.join('\n')
 		.trim();
 }

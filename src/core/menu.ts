@@ -5,6 +5,7 @@ import {
 	claimNfts,
 	multiSender,
 	tokenCollector,
+	unbug,
 	walletsGenerator,
 } from '@/core/modules';
 
@@ -18,6 +19,7 @@ export async function showMenu(wallets: Wallet[]) {
 			{ value: 'claim-nfts', name: '🎁 Claim NFTs' },
 			{ value: 'token-collector', name: '💥 Token Collector' },
 			{ value: 'wallets-generator', name: '👛 Generate Wallets' },
+			{ value: 'unbug', name: '🐞 Unbug' },
 			{ value: 'checker', name: '📊 Checker' },
 			{ value: 'exit', name: '❌ Exit' },
 		],
@@ -27,6 +29,7 @@ export async function showMenu(wallets: Wallet[]) {
 	else if (module === 'claim-nfts') await claimNfts(wallets);
 	else if (module === 'token-collector') await tokenCollector(wallets);
 	else if (module === 'wallets-generator') await walletsGenerator();
+	else if (module === 'unbug') await unbug(wallets);
 	else if (module === 'checker') await new Checker(wallets).run();
 	else if (module === 'exit') process.exit(0);
 }

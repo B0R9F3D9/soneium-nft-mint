@@ -19,14 +19,14 @@ export class Checker {
 
 	async checkWallet(wallet: Wallet): Promise<IChecker> {
 		const [ethBalance, astrBalance, nftBalance] = await Promise.all([
-			wallet.getEthBalance(),
+			wallet.getEthBalance().then(b => b.logAmount),
 			wallet.getTokenBalance(TOKENS.ASTR).then(b => b.logAmount),
 			wallet.getTokenBalance(TOKENS.NFT).then(b => b.logAmount),
 		]);
 		return {
 			index: wallet.index,
 			address: wallet.address,
-			ethBalance: ethBalance.logAmount,
+			ethBalance,
 			astrBalance,
 			nftBalance,
 		};

@@ -11,7 +11,7 @@ export const TOKENS: Record<'ASTR' | 'NFT', IToken> = {
 	NFT: {
 		address: SETTINGS.NFT_ADDRESS,
 		symbol: 'NFT',
-		decimals: 1,
+		decimals: 0,
 		logDecimals: 0,
 	},
 };

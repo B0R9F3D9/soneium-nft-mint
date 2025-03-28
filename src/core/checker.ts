@@ -5,7 +5,6 @@ import { CONFIG } from '@/constants/config';
 import { TOKENS } from '@/constants/tokens';
 import type { Wallet } from '@/core/wallet';
 import type { IChecker } from '@/types/checker';
-import type { IToken } from '@/types/token';
 
 export class Checker {
 	private readonly headers: string[] = [
@@ -18,16 +17,11 @@ export class Checker {
 
 	constructor(public wallets: Wallet[]) {}
 
-	async getTokenBalance(wallet: Wallet, token: IToken) {
-		const balance = await wallet.getTokenBalance(token);
-		return balance.logAmount;
-	}
-
 	async checkWallet(wallet: Wallet): Promise<IChecker> {
 		const [ethBalance, astrBalance, nftBalance] = await Promise.all([
 			wallet.getEthBalance(),
-			this.getTokenBalance(wallet, TOKENS.ASTR),
-			this.getTokenBalance(wallet, TOKENS.NFT),
+			wallet.getTokenBalance(TOKENS.ASTR).then(b => b.logAmount),
+			wallet.getTokenBalance(TOKENS.NFT).then(b => b.logAmount),
 		]);
 		return {
 			index: wallet.index,

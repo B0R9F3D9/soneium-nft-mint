@@ -77,7 +77,13 @@ export class Wallet {
 
 	async sendTx(txData: Transaction): Promise<string> {
 		try {
-			txData.gas = await this.web3.eth.estimateGas(txData);
+			try {
+				txData.gas = await this.web3.eth.estimateGas(txData, 'pending');
+			} catch {
+				txData.gas = await this.web3.eth.estimateGas(txData, 'latest');
+			}
+			if (!txData.gas) throw new Error('Failed to estimate gas');
+
 			const signed = await this.web3.eth.accounts.signTransaction(
 				txData,
 				this.privateKey,
